@@ -1,0 +1,1 @@
+add_library(bounding_box INTERFACE)
