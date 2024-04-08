@@ -1,0 +1,1 @@
+add_library(shader_program "shader_program.cpp" "shader_program.h")
