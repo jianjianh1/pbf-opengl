@@ -66,5 +66,8 @@ public:
     inline void activate() const { glUseProgram(m_id); }
 
     /// @brief Whether this program is available
-    inline bool available() const { return m_id; }
+    inline bool available() const { return static_cast<bool>(m_id); }
+
+    /// @brief Implicit conversion to unsigned int
+    inline operator GLuint() const { return m_id; }
 };

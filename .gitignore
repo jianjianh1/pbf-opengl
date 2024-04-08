@@ -485,6 +485,8 @@ FodyWeavers.xsd
 
 # Generated using ignr.py - github.com/Antrikshy/ignr.py
 
-# Visual Studion build directory
+# Visual Studio build directory
 out/
 
+# Visual Studio cmake settings
+CMakeSettings.json

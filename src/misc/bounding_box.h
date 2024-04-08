@@ -7,6 +7,10 @@ struct BoundingBox
 {
     /// @brief The lowest x, y, and z values
     glm::vec3 low;
+
     /// @brief The highest x, y, and z values
     glm::vec3 high;
+
+    /// @brief Compute the volume of this bounding box
+    float volume() const;
 };

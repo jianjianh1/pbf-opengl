@@ -11,8 +11,8 @@ GLFWwindow* Renderer::setupContext(int width, int height, const char* title)
     }
 
     // OpenGL version
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, renderparams::contextVersionMajor);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, renderparams::contextVersionMinor);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, render_params::contextVersionMajor);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, render_params::contextVersionMinor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // create the window
