@@ -38,6 +38,7 @@ GLuint ShaderProgram::compileShader(GLenum shaderType, const char* shaderPath)
 
 GLuint ShaderProgram::linkProgram(const char* computePath)
 {
+    std::cout << '\n';
     std::cout << "Linking " << computePath << "...\n";
     GLuint program{ glCreateProgram() };
     GLuint computeShader{ compileShader(GL_COMPUTE_SHADER, computePath) };
@@ -61,6 +62,7 @@ GLuint ShaderProgram::linkProgram(const char* computePath)
 
 GLuint ShaderProgram::linkProgram(const char* vertexPath, const char* fragmentPath)
 {
+    std::cout << '\n';
     std::cout << "Linking " << vertexPath << " and " << fragmentPath << "...\n";
     GLuint program{ glCreateProgram() };
     GLuint vertexShader{ compileShader(GL_VERTEX_SHADER, vertexPath) };

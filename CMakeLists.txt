@@ -5,15 +5,13 @@ project(
     LANGUAGES C CXX
     )
 
+find_package(glfw3)
 add_subdirectory("external")
+
 add_subdirectory("src")
 
-find_package(glfw3)
-
-add_executable(main app/main.cpp)
+add_executable(main app/main.cpp "src/render/renderer.h" "src/render/renderer.cpp")
 target_link_libraries(
     main PRIVATE
-    glfw
-    glm
-    glad
+    renderer
     )
