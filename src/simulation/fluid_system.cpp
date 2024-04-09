@@ -2,6 +2,8 @@
 
 #include <misc/helper.h>
 
+#include <glm/gtc/random.hpp>
+
 #include <iostream>
 #include <cmath>
 
@@ -38,12 +40,27 @@ Grid FluidSystem::createGrid(BoundingBox box, BoundingBox volume, int numParticl
     return grid;
 }
 
+std::vector<glm::vec4> FluidSystem::uniformRandomPositions(BoundingBox volume, int numParticles)
+{
+    std::vector<glm::vec4> positions{};
+    for (int i{ 0 }; i < numParticles; ++i)
+    {
+        positions.push_back(glm::vec4(glm::linearRand(volume.low, volume.high), 1.0f));
+    }
+    for (int i{ 0 }; i < 10; ++i)
+    {
+        std::cout << positions[i].x << ' ' << positions[i].y << ' ' << positions[i].z << ' ' << positions[i].w << '\n';
+    }
+    return positions;
+}
+
 FluidSystem::FluidSystem()
     : m_boundary{ simulation_params::boundaryLow, simulation_params::boundaryHigh }
     , m_volume{ simulation_params::volumeLow, simulation_params::volumeHigh }
     , m_numParticles{ helper::roundUp(simulation_params::numParticles, simulation_params::workGroupSize) }
     , m_mass{ m_volume.volume() * simulation_params::waterDensity / m_numParticles }
     , m_grid{ createGrid(m_boundary, m_volume, m_numParticles, simulation_params::expectedParticlesPerCell) }
+    , m_position{GL_STATIC_DRAW, m_numParticles * sizeof(glm::vec4), uniformRandomPositions(m_volume, m_numParticles).data() }
 {
 
 }

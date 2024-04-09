@@ -10,6 +10,8 @@ target_include_directories(shader_program PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(shader_program PUBLIC glad)
 target_include_directories(ssbo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(ssbo PUBLIC glad)
+target_include_directories(vao PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(vao PUBLIC glad ssbo)
 
 add_subdirectory("simulation")
 target_include_directories(fluid_system PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -21,6 +23,7 @@ target_link_libraries(
     bounding_box
     shader_program
     ssbo
+    vao
     )
 
 add_subdirectory("render")
