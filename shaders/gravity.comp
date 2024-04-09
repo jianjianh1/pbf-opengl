@@ -1,0 +1,73 @@
+#version 460 core
+
+layout(local_size_x = 1024) in;
+
+layout(std430, binding = 0) readonly buffer block0
+{
+    vec4 in_positions[];
+};
+
+layout(std430, binding = 1) buffer block1
+{
+    vec4 inout_velocities[];
+};
+
+layout(std430, binding = 2) writeonly buffer block2
+{
+    vec4 out_positions[];
+};
+
+struct Boundary
+{
+    vec3 low;
+    vec3 high;
+};
+
+uniform vec3 u_gravity;
+uniform float u_deltaTime;
+uniform Boundary u_boundary;
+uniform float u_damping;
+
+void main()
+{
+    vec4 velocity = inout_velocities[gl_GlobalInvocationID.x];
+    velocity.xyz = velocity.xyz + u_gravity * u_deltaTime;
+    vec4 position = in_positions[gl_GlobalInvocationID.x];
+    position.xyz = position.xyz + velocity.xyz * u_deltaTime;
+
+    // collision detection
+    if (position.x < u_boundary.low.x)
+    {
+        position.x = u_boundary.low.x + u_damping * (u_boundary.low.x - position.x);
+        velocity.x = -u_damping * velocity.x;
+    }
+    if (position.x > u_boundary.high.x)
+    {
+        position.x = u_boundary.high.x - u_damping * (position.x - u_boundary.high.x);
+        velocity.x = -u_damping * velocity.x;
+    }
+    if (position.y < u_boundary.low.y)
+    {
+        position.y = u_boundary.low.y + u_damping * (u_boundary.low.y - position.y);
+        velocity.y = -u_damping * velocity.y;
+    }
+    if (position.y > u_boundary.high.y)
+    {
+        position.y = u_boundary.high.y - u_damping * (position.y - u_boundary.high.y);
+        velocity.y = -u_damping * velocity.y;
+    }
+    if (position.z < u_boundary.low.z)
+    {
+        position.z = u_boundary.low.z + u_damping * (u_boundary.low.z - position.z);
+        velocity.z = -u_damping * velocity.z;
+    }
+    if (position.z > u_boundary.high.z)
+    {
+        position.z = u_boundary.high.z - u_damping * (position.z - u_boundary.high.z);
+        velocity.z = -u_damping * velocity.z;
+    }
+
+    // output
+    out_positions[gl_GlobalInvocationID.x] = position;
+    inout_velocities[gl_GlobalInvocationID.x] = velocity;
+}

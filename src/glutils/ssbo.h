@@ -36,4 +36,7 @@ public:
 
     /// @brief Return its ID when converted to unsigned int
     inline operator GLuint() const { return m_id; }
+
+    /// @brief Swap the two SSBO
+    static void swap(SSBO& ssbo1, SSBO& ssbo2);
 };

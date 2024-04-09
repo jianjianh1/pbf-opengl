@@ -174,6 +174,16 @@ void ShaderProgram::setUniform(const char *name, const glm::vec3 &value)
     );
 }
 
+void ShaderProgram::setUniform(const char* name, const glm::uvec3& value)
+{
+    glUseProgram(m_id);
+    glUniform3uiv(
+        glGetUniformLocation(m_id, name),
+        1,
+        glm::value_ptr(value)
+    );
+}
+
 void ShaderProgram::setUniform(const char* name, const glm::vec4& value)
 {
     glUseProgram(m_id);

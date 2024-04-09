@@ -21,9 +21,9 @@ target_link_libraries(
     glad
     helper
     bounding_box
-    shader_program
     ssbo
     vao
+    shader_program
     )
 
 add_subdirectory("render")

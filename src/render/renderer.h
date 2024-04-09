@@ -27,6 +27,12 @@ private:
     /// @brief The OpenGL context, a window
     GLFWwindow* m_context;
 
+    /// @brief The time when the last frame starts
+    double m_timeLastFrame;
+
+    /// @brief Frames for printing FPS
+    int m_frames;
+
     /// @brief Background color (clear color)
     glm::vec4 m_background;
 

@@ -17,7 +17,9 @@ namespace render_params
 
     const glm::vec4 clearColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 
-    constexpr float cameraDistance{ 12.0f };
+    constexpr int fpsFrames{ 60 };
+
+    constexpr float cameraDistance{ 15.0f };
     constexpr float cameraAngleY{ 45.0f };
     constexpr float cameraAngleX{ 45.0f };
 
@@ -94,16 +96,27 @@ void Renderer::run()
 {
     glEnable(GL_DEPTH_TEST);
     glClearColor(m_background.r, m_background.g, m_background.b, m_background.a);
+    m_frames = 0;
+    m_timeLastFrame = glfwGetTime();
     while (!glfwWindowShouldClose(m_context))
     {
         glfwGetFramebufferSize(m_context, &m_width, &m_height);
         glViewport(0, 0, m_width, m_height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        m_fluid.update();
         renderFluid();
 
         glfwSwapBuffers(m_context);
         glfwPollEvents();
+
+        if (++m_frames == render_params::fpsFrames)
+        {
+            double timeThisFrame{ glfwGetTime() };
+            std::cout << "FPS: " << render_params::fpsFrames / (timeThisFrame - m_timeLastFrame) << "\n";
+            m_timeLastFrame = timeThisFrame;
+            m_frames = 0;
+        }
     }
 }
 

@@ -48,7 +48,7 @@ private:
     /// @brief The other SSBO for particles' next position for computing
     SSBO m_nextPositions;
 
-    /// @brief The SSBO for storing the densities of particles
+    /// @brief The SSBO for storing the densities of particles, only for debugging
     SSBO m_densities;
 
     /// @brief The SSBO for storing lambdas (step size in the Newton's method) of particles
@@ -56,6 +56,24 @@ private:
 
     /// @brief The VAO for rendering particles
     VAO m_VAO;
+
+    /// @brief Shader for computing gravity
+    ShaderProgram m_gravityShader;
+
+    /// @brief Shader for counting the number of particles in cells
+    ShaderProgram m_particlesCellsShader;
+
+    /// @brief Shader for computing the prefix sum
+    ShaderProgram m_prefixSumShader;
+
+    /// @brief Shader for reindexing particles
+    ShaderProgram m_reindexShader;
+
+    /// @brief Shader for computing lambdas
+    ShaderProgram m_positionSolverShader;
+
+    /// @brief Shader for velocity correction
+    ShaderProgram m_velocityCorrectShader;
 
     /// @brief Create a grid based on the parameters
     /// @param box the box to be divided into a grid of cells
@@ -71,13 +89,34 @@ private:
     /// @return the positions
     static std::vector<glm::vec4> uniformRandomPositions(BoundingBox volume, int numParticles);
 
+    /// @brief Apply gravity to the positions to get predicted positions
+    void applyGravity();
+
+    /// @brief Count the number of particles in each cell
+    void countParticlesCells();
+
+    /// @brief Compute the prefix sum number of particles in each cell
+    void prefixSumCells();
+
+    /// @brief Reindex the particles
+    void reindexParticles();
+
+    /// @brief Compute the lambdas in position based dynamics
+    void positionSolver();
+
+    /// @brief Update position using solve iterations
+    void updatePosition();
+
+    /// @brief Correct velocities
+    void velecityCorrection();
+
 public:
     /// @brief Create a fluid system
     FluidSystem();
 
     /// @brief Draw the particles
-    void draw(const ShaderProgram& program) const;
+    void draw(const ShaderProgram& program)const;
 
-    /// @brief Apply gravity to the positions to get predicted positions
-    void applyGravity();
+    /// @brief Update to the next frame
+    void update();
 };

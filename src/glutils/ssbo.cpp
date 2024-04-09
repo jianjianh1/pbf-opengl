@@ -34,3 +34,8 @@ void SSBO::bind(GLuint index) const
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, m_id);
 }
+
+void SSBO::swap(SSBO& ssbo1, SSBO& ssbo2)
+{
+    std::swap(ssbo1.m_id, ssbo2.m_id);
+}

@@ -90,6 +90,9 @@ public:
     /// @brief Set a vec3 uniform
     void setUniform(const char* name, const glm::vec3& value);
 
+    /// @brief Set a uvec3 uniform
+    void setUniform(const char* name, const glm::uvec3& value);
+
     /// @brief Set a vec4 uniform
     void setUniform(const char* name, const glm::vec4& value);
 

@@ -1,0 +1,158 @@
+#version 460 core
+
+layout(local_size_x = 1024) in;
+
+layout(std430, binding = 0) readonly buffer block0
+{
+    vec4 in_positions[];
+};
+
+layout(std430, binding = 1) buffer block1
+{
+    float out_lambdas[];
+};
+
+layout(std430, binding = 2) writeonly buffer block2
+{
+    float out_densities[];
+};
+
+layout(std430, binding = 3) readonly buffer block3
+{
+    uint in_prefixSums[];
+};
+
+layout(std430, binding = 4) writeonly buffer block4
+{
+    vec4 out_positions[];
+};
+
+float poly6(vec3 rvec, float h)
+{
+    const float coeff = 1.5666814710608448; // 315 / (64 * PI)
+    float r = min(h, length(rvec));
+    return coeff * pow(h * h - r * r, 3) / pow(h, 9);
+}
+
+vec3 gradSpiky(vec3 rvec, float h)
+{
+    const float coeff = 4.7746482927568605; // 15 / PI
+    float r = length(rvec);
+    if (r == 0.0) return vec3(0.0);
+    vec3 rNormalized = rvec / r;
+    r = min(h, r);
+    return -3.0 * coeff * pow(h - r, 2) * rNormalized / pow(h, 6);
+}
+
+struct Boundary
+{
+    vec3 low;
+    vec3 high;
+};
+
+uniform Boundary u_boundary;
+uniform uvec3 u_gridResolution;
+
+uvec3 cellIdVec(vec3 position)
+{
+    const vec3 diagonal = u_boundary.high - u_boundary.low;
+    vec3 cellSize = diagonal / u_gridResolution;
+    return uvec3((position - u_boundary.low) / cellSize);
+}
+
+uniform float u_mass;
+uniform float u_restDensity;
+uniform float u_radius;
+uniform float u_damping;
+
+void main()
+{
+    vec3 position = in_positions[gl_GlobalInvocationID.x].xyz;
+    uvec3 cellIdV = cellIdVec(position);
+
+    float density = 0;
+    vec3 derivThisConstraint = vec3(0.0);
+    float sumSquareDerivOtherConstraint = 0;
+    for (uint i = max(0, cellIdV.x - 1); i < min(u_gridResolution.x, cellIdV.x + 2); i++)
+    {
+        for (uint j = max(0, cellIdV.y - 1); j < min(u_gridResolution.y, cellIdV.y + 2); j++)
+        {
+            for (uint k = max(0, cellIdV.z - 1); k < min(u_gridResolution.z, cellIdV.z + 2); k++)
+            {
+                uint cellIdx = i + u_gridResolution.x * j + u_gridResolution.x * u_gridResolution.y * k;
+                for (uint particleIdx = cellIdx == 0 ? 0 : in_prefixSums[cellIdx - 1];
+                     particleIdx < in_prefixSums[cellIdx];
+                     particleIdx++)
+                {
+                    vec3 otherPosition = in_positions[particleIdx].xyz;
+                    vec3 diff = position - otherPosition;
+                    density += u_mass * poly6(diff, u_radius);
+                    vec3 grad = gradSpiky(diff, u_radius);
+                    derivThisConstraint += u_mass * grad / u_restDensity;
+                    vec3 derivOtherConstraint = -u_mass * grad / u_restDensity;
+                    sumSquareDerivOtherConstraint += dot(derivOtherConstraint, derivOtherConstraint);
+                }
+            }
+        }
+    }
+
+    float C = density / u_restDensity - 1.0;
+    float squareDerivThisConstraint = dot(derivThisConstraint, derivThisConstraint);
+    out_lambdas[gl_GlobalInvocationID.x] = - C / (squareDerivThisConstraint + sumSquareDerivOtherConstraint + 1e-4);
+
+    out_densities[gl_GlobalInvocationID.x] = density;
+
+    barrier();
+    memoryBarrierBuffer();
+
+    vec3 deltaPosition;
+    for (uint i = max(0, cellIdV.x - 1); i < min(u_gridResolution.x, cellIdV.x + 2); i++)
+    {
+        for (uint j = max(0, cellIdV.y - 1); j < min(u_gridResolution.y, cellIdV.y + 2); j++)
+        {
+            for (uint k = max(0, cellIdV.z - 1); k < min(u_gridResolution.z, cellIdV.z + 2); k++)
+            {
+                uint cellIdx = i + u_gridResolution.x * j + u_gridResolution.x * u_gridResolution.y * k;
+                for (uint particleIdx = cellIdx == 0 ? 0 : in_prefixSums[cellIdx - 1];
+                     particleIdx < in_prefixSums[cellIdx];
+                     particleIdx++)
+                {
+                    vec3 otherPosition = in_positions[particleIdx].xyz;
+                    vec3 diff = position - otherPosition;
+                    vec3 grad = gradSpiky(diff, u_radius);
+                    deltaPosition += (out_lambdas[gl_GlobalInvocationID.x] + out_lambdas[particleIdx]) * u_mass * grad / u_restDensity;
+                }
+            }
+        }
+    }
+
+    position += deltaPosition;
+    if (position.x < u_boundary.low.x)
+    {
+        position.x = u_boundary.low.x + u_damping * (u_boundary.low.x - position.x);
+    }
+    if (position.x > u_boundary.high.x)
+    {
+        position.x = u_boundary.high.x - u_damping * (position.x - u_boundary.high.x);
+    }
+    if (position.y < u_boundary.low.y)
+    {
+        position.y = u_boundary.low.y + u_damping * (u_boundary.low.y - position.y);
+    }
+    if (position.y > u_boundary.high.y)
+    {
+        position.y = u_boundary.high.y - u_damping * (position.y - u_boundary.high.y);
+    }
+    if (position.z < u_boundary.low.z)
+    {
+        position.z = u_boundary.low.z + u_damping * (u_boundary.low.z - position.z);
+    }
+    if (position.z > u_boundary.high.z)
+    {
+        position.z = u_boundary.high.z - u_damping * (position.z - u_boundary.high.z);
+    }
+
+    out_positions[gl_GlobalInvocationID.x].xyz = position;
+    out_positions[gl_GlobalInvocationID.x].w = in_positions[gl_GlobalInvocationID.x].w;
+    // out_positions[gl_GlobalInvocationID.x] = in_positions[gl_GlobalInvocationID.x];
+}
