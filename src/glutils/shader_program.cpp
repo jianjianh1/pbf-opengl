@@ -130,4 +130,5 @@ ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept
 ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept
 {
     std::swap(m_id, other.m_id);
+    return *this;
 }

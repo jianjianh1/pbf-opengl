@@ -2,6 +2,7 @@
 
 #include <misc/bounding_box.h>
 #include <misc/grid.h>
+#include <glutils/ssbo.h>
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -10,45 +11,54 @@
 class FluidSystem
 {
 private:
-    /// @brief The SSBO for particles' starting position in one frame
-    GLuint m_startPosition;
-
-    /// @brief The SSBO for particles' intermediate position for computing
-    GLuint m_intermediatePosition;
-
-    /// @brief The other SSBO for particles' next position for computing
-    GLuint m_nextPosition;
-
-    /// @brief The SSBO for storing the velocities of particles
-    GLuint m_velocities;
-    
-    /// @brief The SSBO for storing the densities of particles
-    GLuint m_densities;
-
-    /// @brief The SSBO for storing lambdas (step size in the Newton's method) of particles
-    GLuint m_lambdas;
-
-    /// @brief The effective radius for SPH method
-    float effectiveRadius;
-
     /// @brief The boundary of this system
     BoundingBox m_boundary;
+
+    /// @brief The volume of fluid in m^3; ideally it will not be changed
+    BoundingBox m_volume;
+
+    /// @brief Total number of particles
+    int m_numParticles;
+
+    /// @brief The mass of each particle in kg
+    float m_mass;
 
     /// @brief The grid used for finding neighbors
     Grid m_grid;
 
+    /// @brief The SSBO for particles' starting position in one frame; initialized, used for drawing
+    SSBO m_position;
+
+    /// @brief The SSBO for storing the velocities of particles; initialized
+    SSBO m_velocities;
+
     /// @brief The SSBO for storing the number of particles in the cells
-    GLuint m_numParticlesCells;
+    SSBO m_numParticlesCells;
 
     /// @brief The SSBO for storing the prefix sum of particles in the cells
-    GLuint m_prefixSumParticlesCells;
+    SSBO m_prefixSumParticlesCells;
+
+    /// @brief The SSBO for particles' intermediate position for computing
+    SSBO m_intermediatePosition;
+
+    /// @brief The other SSBO for particles' next position for computing
+    SSBO m_nextPosition;
+
+    /// @brief The SSBO for storing the densities of particles
+    SSBO m_densities;
+
+    /// @brief The SSBO for storing lambdas (step size in the Newton's method) of particles
+    SSBO m_lambdas;
+
+    /// @brief Create a grid based on the parameters
+    /// @param box the box to be divided into a grid of cells
+    /// @param volume the volume of fluid
+    /// @param numParticles the number of particles
+    /// @param expectedParticlesPerCell expected number of particles per cell
+    /// @return 
+    static Grid createGrid(BoundingBox box, BoundingBox volume, int numParticles, int expectedParticlesPerCell);
 
 public:
-    /// @brief Create a fluid system with the given boundary and the given initial volume of fluid with
-    ///        the number of particles
-    /// @param boundary the initial boundary of the system
-    /// @param volume the initial volume
-    /// @param numParticles the number of particles
-    /// @param compression the initial compression of the fluid
-    FluidSystem(const BoundingBox& boundary, const BoundingBox& volume, size_t numParticles, float compression = 1.0f);
+    /// @brief Create a fluid system
+    FluidSystem();
 };

@@ -1,8 +1,27 @@
 #include "renderer.h"
 
-#include <misc/parameters.h>
-
 #include <iostream>
+
+/// @brief Parameters for the renderer
+namespace render_params
+{
+    constexpr int contextVersionMajor{ 4 };
+    constexpr int contextVersionMinor{ 6 };
+
+    constexpr int width{ 800 };
+    constexpr int height{ 600 };
+    const char* title{ "Fluid Simulation" };
+
+    const glm::vec4 clearColor{ 1.0f, 0.0f, 0.0f, 1.0f };
+
+    constexpr float cameraDistance{ 4.0f };
+    constexpr float cameraAngleY{ 45.0f };
+    constexpr float cameraAngleX{ 45.0f };
+
+    constexpr float lightDistance{ 3.0f };
+    constexpr float lightAngleY{ 45.0f };
+    constexpr float lightAngleX{ 45.0f };
+}
 
 GLFWwindow* Renderer::setupContext(int width, int height, const char* title)
 {
@@ -41,7 +60,7 @@ GLFWwindow* Renderer::setupContext(int width, int height, const char* title)
 Renderer::Renderer()
     : m_width{ render_params::width }
     , m_height{ render_params::height }
-    , m_title{ render_params::title}
+    , m_title{ render_params::title }
     , m_context{ setupContext(m_width, m_height, m_title.c_str()) }
     , m_background{ render_params::clearColor }
     , m_camera{ render_params::cameraDistance, render_params::cameraAngleY, render_params::cameraAngleX }

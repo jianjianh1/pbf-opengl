@@ -6,5 +6,6 @@
 struct Grid
 {
     int numCells;
+    float cellSize;
     glm::uvec3 resolution;
 };

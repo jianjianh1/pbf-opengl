@@ -2,6 +2,7 @@
 
 #include "orbit_camera.h"
 #include "orbit_light.h"
+#include <simulation/fluid_system.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -34,11 +35,14 @@ private:
     /// @brief Only one light
     OrbitLight m_light;
 
+    /// @brief The fluid render
+    FluidSystem m_fluid;
+
     /// @brief Initialize the window
     static GLFWwindow* setupContext(int width, int height, const char* title);
 
 public:
-    /// @brief Create a renderer with the initial size and title
+    /// @brief Create a renderer
     Renderer();
 
     /// @brief Close the renderer

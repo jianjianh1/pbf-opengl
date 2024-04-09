@@ -9,8 +9,8 @@
 class ShaderProgram
 {
 private:
-    /// @brief The ID of a linked shader program.
-    GLuint m_id;
+    /// @brief The ID of a linked shader program, nonzero if initialized correctly
+    GLuint m_id{};
 
     /// @brief Read the content of a file into a string. This function is used to read
     ///        shader source code files
