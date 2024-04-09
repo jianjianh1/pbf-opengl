@@ -16,22 +16,25 @@ private:
     float m_angleFromX{};
 
     /// @brief The orbit center
-    const glm::vec3 m_center{};
+    glm::vec3 m_center{};
 
     /// @brief The ambient light intensity
-    const glm::vec3 m_ambient{};
+    glm::vec3 m_ambient{};
 
     /// @brief The diffuse light intensity
-    const glm::vec3 m_diffuse{};
+    glm::vec3 m_diffuse{};
 
     /// @brief The specular light intensity
-    const glm::vec3 m_specular{};
+    glm::vec3 m_specular{};
 
 public:
+    /// @brief Default constructor
+    OrbitLight() = default;
+
     /// @brief Construct a light with the parameters
     OrbitLight(
         float distance, float angleFromY, float angleFromX,
-        const glm::vec3& center = glm::vec3(1.0f),
+        const glm::vec3& center = glm::vec3{},
         const glm::vec3& ambient = glm::vec3(0.1f),
         const glm::vec3& diffuse = glm::vec3(1.0f),
         const glm::vec3& specular = glm::vec3(1.0f));

@@ -17,4 +17,18 @@ namespace render_params
 {
     constexpr int contextVersionMajor{ 4 };
     constexpr int contextVersionMinor{ 6 };
+
+    constexpr int width{ 800 };
+    constexpr int height{ 600 };
+    const char* title{ "Fluid Simulation" };
+
+    const glm::vec4 clearColor{ 1.0f, 0.0f, 0.0f, 1.0f };
+
+    constexpr float cameraDistance{ 4.0f };
+    constexpr float cameraAngleY{ 45.0f };
+    constexpr float cameraAngleX{ 45.0f };
+
+    constexpr float lightDistance{ 3.0f };
+    constexpr float lightAngleY{ 45.0f };
+    constexpr float lightAngleX{ 45.0f };
 }

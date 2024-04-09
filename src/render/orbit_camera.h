@@ -16,9 +16,12 @@ private:
     float m_angleFromX{};
 
     /// @brief the orbit center
-    const glm::vec3 m_center{};
+    glm::vec3 m_center{};
 
 public:
+    /// @brief Default constructor
+    OrbitCamera() = default;
+
     /// @brief Construct a camera with an initial distance, angles, orbit center,
     ///        and up direction
     /// @param distance the distance from the orbit center
