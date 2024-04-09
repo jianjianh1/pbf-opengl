@@ -15,7 +15,7 @@ namespace render_params
     constexpr int height{ 600 };
     const char* title{ "Fluid Simulation" };
 
-    const glm::vec4 clearColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+    const glm::vec4 clearColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
     constexpr int fpsFrames{ 60 };
 

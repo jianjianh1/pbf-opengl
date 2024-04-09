@@ -16,10 +16,10 @@ namespace simulation_params
     constexpr float waterDensity{ 997.0f }; // kg/m^3
     const glm::vec3 gravity{ 0.0f, -9.80665f, 0.0f }; // m/s^2
     //const glm::vec3 gravity{ 0.0f, 0.0f, 0.0f }; // m/s^2
-    constexpr float deltaTime{ 1.0f / (60 * stepsPerFrame) };
+    constexpr float deltaTime{ 1.0f / (60 * stepsPerFrame * 10) };
     constexpr float collisionDamping{ 0.0f };
 
-    constexpr int numParticles{ 40'000 };
+    constexpr int numParticles{ 10'000 };
     constexpr int expectedParticlesPerCell{ 30 };
 
     const glm::vec3 boundaryLow{ -4.0f, -4.0f, -4.0f };
@@ -247,6 +247,7 @@ void FluidSystem::draw(const ShaderProgram& program) const
 {
     m_VAO.setAttrib(m_positions, 0, 3, GL_FLOAT, sizeof(glm::vec4), 0);
     program.activate();
+    glPointSize(5.0f);
     glDrawArrays(GL_POINTS, 0, m_numParticles);
 }
 
