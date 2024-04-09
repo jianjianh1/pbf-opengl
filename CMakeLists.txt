@@ -13,6 +13,8 @@ add_subdirectory("external")
 
 add_subdirectory("src")
 
+add_subdirectory("shaders")
+
 add_executable(main app/main.cpp)
 target_link_libraries(
     main PRIVATE

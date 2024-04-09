@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include <string>
 
@@ -62,6 +63,15 @@ public:
     /// @brief Move assignment
     ShaderProgram& operator=(ShaderProgram&& other) noexcept;
 
+    /// @brief Constructor a program with the givne compute shader
+    /// @param computePath 
+    ShaderProgram(const char* computePath);
+
+    /// @brief Constructor a program with the given vertex and fragment shader
+    /// @param vertexPath 
+    /// @param fragmentPath 
+    ShaderProgram(const char* vertexPath, const char* fragmentPath);
+
     /// @brief Activate this program
     inline void activate() const { glUseProgram(m_id); }
 
@@ -70,4 +80,22 @@ public:
 
     /// @brief Implicit conversion to unsigned int
     inline operator GLuint() const { return m_id; }
+
+    /// @brief Set an integer uniform
+    void setUniform(const char* name, int value);
+
+    /// @brief Set an float uniform
+    void setUniform(const char* name, float value);
+
+    /// @brief Set a vec3 uniform
+    void setUniform(const char* name, const glm::vec3& value);
+
+    /// @brief Set a vec4 uniform
+    void setUniform(const char* name, const glm::vec4& value);
+
+    /// @brief Set a 3x3 matrix uniform
+    void setUniform(const char* name, const glm::mat3& value);
+
+    /// @brief Set a 4x4 matrix uniform
+    void setUniform(const char* name, const glm::mat4& value);
 };

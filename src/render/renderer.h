@@ -3,6 +3,7 @@
 #include "orbit_camera.h"
 #include "orbit_light.h"
 #include <simulation/fluid_system.h>
+#include <glutils/shader_program.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -35,6 +36,9 @@ private:
     /// @brief Only one light
     OrbitLight m_light;
 
+    /// @brief Shader for rendering fluid
+    ShaderProgram m_fluidShader;
+
     /// @brief The fluid render
     FluidSystem m_fluid;
 
@@ -56,4 +60,7 @@ public:
 
     /// @brief Render loop
     void run();
+
+    /// @brief Render fluid
+    void renderFluid();
 };

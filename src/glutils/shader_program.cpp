@@ -1,5 +1,7 @@
 #include "shader_program.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -24,6 +26,7 @@ GLuint ShaderProgram::compileShader(GLenum shaderType, const char* shaderPath)
     std::string shaderString{ readFile(shaderPath) };
     const char* shaderSource{ shaderString.c_str() };
     glShaderSource(shader, 1, &shaderSource, nullptr);
+    glCompileShader(shader);
     if (!compileSuccess(shader, shaderPath))
     {
         glDeleteShader(shader);
@@ -131,4 +134,74 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept
 {
     std::swap(m_id, other.m_id);
     return *this;
+}
+
+ShaderProgram::ShaderProgram(const char* computePath)
+    : m_id{ linkProgram(computePath) }
+{
+}
+
+ShaderProgram::ShaderProgram(const char* vertexPath, const char* fragmentPath)
+    : m_id{ linkProgram(vertexPath, fragmentPath) }
+{
+}
+
+void ShaderProgram::setUniform(const char *name, int value)
+{
+    glUseProgram(m_id);
+    glUniform1i(
+        glGetUniformLocation(m_id, name),
+        value
+    );
+}
+
+void ShaderProgram::setUniform(const char *name, float value)
+{
+    glUseProgram(m_id);
+    glUniform1f(
+        glGetUniformLocation(m_id, name),
+        value
+    );
+}
+
+void ShaderProgram::setUniform(const char *name, const glm::vec3 &value)
+{
+    glUseProgram(m_id);
+    glUniform3fv(
+        glGetUniformLocation(m_id, name),
+        1,
+        glm::value_ptr(value)
+    );
+}
+
+void ShaderProgram::setUniform(const char* name, const glm::vec4& value)
+{
+    glUseProgram(m_id);
+    glUniform4fv(
+        glGetUniformLocation(m_id, name),
+        1,
+        glm::value_ptr(value)
+    );
+}
+
+void ShaderProgram::setUniform(const char *name, const glm::mat3 &value)
+{
+    glUseProgram(m_id);
+    glUniformMatrix3fv(
+        glGetUniformLocation(m_id, name),
+        1,
+        GL_FALSE,
+        glm::value_ptr(value)
+    );
+}
+
+void ShaderProgram::setUniform(const char *name, const glm::mat4 &value)
+{
+    glUseProgram(m_id);
+    glUniformMatrix4fv(
+        glGetUniformLocation(m_id, name),
+        1,
+        GL_FALSE,
+        glm::value_ptr(value)
+    );
 }

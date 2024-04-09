@@ -41,7 +41,7 @@ public:
     /// @param stride the stride
     /// @param offset the offset
     /// @param normalized if the data is normalized
-    void setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized = GL_FALSE);
+    void setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized = GL_FALSE) const;
 
     /// @brief Implicit conversion to unsigned int
     inline operator GLuint() const { return m_id; }

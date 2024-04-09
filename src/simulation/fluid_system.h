@@ -4,6 +4,7 @@
 #include <misc/grid.h>
 #include <glutils/ssbo.h>
 #include <glutils/vao.h>
+#include <glutils/shader_program.h>
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -30,7 +31,7 @@ private:
     Grid m_grid;
 
     /// @brief The SSBO for particles' starting position in one frame; initialized, used for drawing
-    SSBO m_position;
+    SSBO m_positions;
 
     /// @brief The SSBO for storing the velocities of particles; initialized
     SSBO m_velocities;
@@ -42,10 +43,10 @@ private:
     SSBO m_prefixSumParticlesCells;
 
     /// @brief The SSBO for particles' intermediate position for computing
-    SSBO m_intermediatePosition;
+    SSBO m_intermediatePositions;
 
     /// @brief The other SSBO for particles' next position for computing
-    SSBO m_nextPosition;
+    SSBO m_nextPositions;
 
     /// @brief The SSBO for storing the densities of particles
     SSBO m_densities;
@@ -56,12 +57,6 @@ private:
     /// @brief The VAO for rendering particles
     VAO m_VAO;
 
-    /// @brief Get positions distributed uniformly in the given volume
-    /// @param volume the volume
-    /// @param numParticles the number of particles
-    /// @return the positions
-    static std::vector<glm::vec4> uniformRandomPositions(BoundingBox volume, int numParticles);
-
     /// @brief Create a grid based on the parameters
     /// @param box the box to be divided into a grid of cells
     /// @param volume the volume of fluid
@@ -70,7 +65,19 @@ private:
     /// @return the grid
     static Grid createGrid(BoundingBox box, BoundingBox volume, int numParticles, int expectedParticlesPerCell);
 
+    /// @brief Get positions distributed uniformly in the given volume
+    /// @param volume the volume
+    /// @param numParticles the number of particles
+    /// @return the positions
+    static std::vector<glm::vec4> uniformRandomPositions(BoundingBox volume, int numParticles);
+
 public:
     /// @brief Create a fluid system
     FluidSystem();
+
+    /// @brief Draw the particles
+    void draw(const ShaderProgram& program) const;
+
+    /// @brief Apply gravity to the positions to get predicted positions
+    void applyGravity();
 };

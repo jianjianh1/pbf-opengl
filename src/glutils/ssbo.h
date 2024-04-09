@@ -29,7 +29,7 @@ public:
     SSBO& operator=(SSBO&& other) noexcept;
 
     /// @brief Create a SSBO specifying the parameters
-    SSBO(GLenum usage, GLsizeiptr size, const void* data);
+    SSBO(GLenum usage, GLsizeiptr size, const void* data = nullptr);
 
     /// @brief Let this buffer bind to the given index
     void bind(GLuint index) const;

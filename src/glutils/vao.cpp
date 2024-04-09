@@ -27,8 +27,9 @@ VAO& VAO::operator=(VAO&& other) noexcept
     return *this;
 }
 
-void VAO::setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized)
+void VAO::setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized) const
 {
+    activate();
     glBindBuffer(GL_ARRAY_BUFFER, ssbo);
     glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<void*>(offset));
     glEnableVertexAttribArray(index);
