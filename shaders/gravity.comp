@@ -7,9 +7,9 @@ layout(std430, binding = 0) readonly buffer block0
     vec4 in_positions[];
 };
 
-layout(std430, binding = 1) buffer block1
+layout(std430, binding = 1) readonly buffer block1
 {
-    vec4 inout_velocities[];
+    vec4 in_velocities[];
 };
 
 layout(std430, binding = 2) writeonly buffer block2
@@ -30,44 +30,37 @@ uniform float u_damping;
 
 void main()
 {
-    vec4 velocity = inout_velocities[gl_GlobalInvocationID.x];
-    velocity.xyz = velocity.xyz + u_gravity * u_deltaTime;
-    vec4 position = in_positions[gl_GlobalInvocationID.x];
-    position.xyz = position.xyz + velocity.xyz * u_deltaTime;
+    uint id = gl_GlobalInvocationID.x;
+    vec3 velocity = in_velocities[id].xyz + u_gravity * u_deltaTime;
+    // vec3 velocity = u_gravity * u_deltaTime;
+    vec3 position = in_positions[id].xyz + velocity * u_deltaTime;
 
     // collision detection
     if (position.x < u_boundary.low.x)
     {
-        position.x = u_boundary.low.x + u_damping * (u_boundary.low.x - position.x);
-        velocity.x = -u_damping * velocity.x;
+        position.x = u_boundary.low.x + u_damping * (u_boundary.low.x - position.x) + 1e-3;
     }
-    if (position.x > u_boundary.high.x)
+    if (position.x >= u_boundary.high.x)
     {
-        position.x = u_boundary.high.x - u_damping * (position.x - u_boundary.high.x);
-        velocity.x = -u_damping * velocity.x;
+        position.x = u_boundary.high.x - u_damping * (position.x - u_boundary.high.x) - 1e-3;
     }
-    if (position.y < u_boundary.low.y)
+    if (position.y <= u_boundary.low.y)
     {
-        position.y = u_boundary.low.y + u_damping * (u_boundary.low.y - position.y);
-        velocity.y = -u_damping * velocity.y;
+        position.y = u_boundary.low.y + u_damping * (u_boundary.low.y - position.y) + 1e-3;
     }
-    if (position.y > u_boundary.high.y)
+    if (position.y >= u_boundary.high.y)
     {
-        position.y = u_boundary.high.y - u_damping * (position.y - u_boundary.high.y);
-        velocity.y = -u_damping * velocity.y;
+        position.y = u_boundary.high.y - u_damping * (position.y - u_boundary.high.y) - 1e-3;
     }
-    if (position.z < u_boundary.low.z)
+    if (position.z <= u_boundary.low.z)
     {
-        position.z = u_boundary.low.z + u_damping * (u_boundary.low.z - position.z);
-        velocity.z = -u_damping * velocity.z;
+        position.z = u_boundary.low.z + u_damping * (u_boundary.low.z - position.z) + 1e-3;
     }
-    if (position.z > u_boundary.high.z)
+    if (position.z >= u_boundary.high.z)
     {
-        position.z = u_boundary.high.z - u_damping * (position.z - u_boundary.high.z);
-        velocity.z = -u_damping * velocity.z;
+        position.z = u_boundary.high.z - u_damping * (position.z - u_boundary.high.z) - 1e-3;
     }
 
     // output
-    out_positions[gl_GlobalInvocationID.x] = position;
-    inout_velocities[gl_GlobalInvocationID.x] = velocity;
+    out_positions[id].xyz = position;
 }

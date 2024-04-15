@@ -11,19 +11,19 @@ namespace render_params
     constexpr int contextVersionMajor{ 4 };
     constexpr int contextVersionMinor{ 6 };
 
-    constexpr int width{ 800 };
-    constexpr int height{ 600 };
+    constexpr int width{ 1920 };
+    constexpr int height{ 1080 };
     const char* title{ "Fluid Simulation" };
 
     const glm::vec4 clearColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
     constexpr int fpsFrames{ 60 };
 
-    constexpr float cameraDistance{ 15.0f };
-    constexpr float cameraAngleY{ 45.0f };
+    constexpr float cameraDistance{ 4.0f };
+    constexpr float cameraAngleY{ 60.0f };
     constexpr float cameraAngleX{ 45.0f };
 
-    constexpr float lightDistance{ 10.0f };
+    constexpr float lightDistance{ 3.0f };
     constexpr float lightAngleY{ 45.0f };
     constexpr float lightAngleX{ 45.0f };
 
@@ -74,6 +74,32 @@ GLFWwindow* Renderer::setupContext(int width, int height, const char* title)
     return window;
 }
 
+void Renderer::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    constexpr float moveAmount{ 0.05f };
+    Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        renderer->m_fluid.reset();
+    }
+    if (key == GLFW_KEY_LEFT)
+    {
+        renderer->m_fluid.moveBoundaryX(-moveAmount);
+    }
+    if (key == GLFW_KEY_RIGHT)
+    {
+        renderer->m_fluid.moveBoundaryX(moveAmount);
+    }
+    if (key == GLFW_KEY_DOWN)
+    {
+        renderer->m_fluid.moveBoundaryZ(-moveAmount);
+    }
+    if (key == GLFW_KEY_UP)
+    {
+        renderer->m_fluid.moveBoundaryZ(moveAmount);
+    }
+}
+
 Renderer::Renderer()
     : m_width{ render_params::width }
     , m_height{ render_params::height }
@@ -85,6 +111,7 @@ Renderer::Renderer()
     , m_fluidShader{ shader_path::particleVert, shader_path::particleFrag }
 {
     glfwSetWindowUserPointer(m_context, this); // GLFW callbacks can only be static functions
+    glfwSetKeyCallback(m_context, keyCallback);
 };
 
 Renderer::~Renderer()
@@ -94,7 +121,7 @@ Renderer::~Renderer()
 
 void Renderer::run()
 {
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     glClearColor(m_background.r, m_background.g, m_background.b, m_background.a);
     m_frames = 0;
     m_timeLastFrame = glfwGetTime();
@@ -104,8 +131,8 @@ void Renderer::run()
         glViewport(0, 0, m_width, m_height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_fluid.update();
         renderFluid();
+        m_fluid.update();
 
         glfwSwapBuffers(m_context);
         glfwPollEvents();

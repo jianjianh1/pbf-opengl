@@ -31,7 +31,16 @@ private:
     Grid m_grid;
 
     /// @brief The SSBO for particles' starting position in one frame; initialized, used for drawing
-    SSBO m_positions;
+    SSBO m_startPosition;
+
+    /// @brief The buffer for saving position the starting positions reindexed; for velocity correction
+    SSBO m_savedPositions;
+
+    /// @brief The SSBO for particles' intermediate position for computing
+    SSBO m_intermediatePositions;
+
+    /// @brief The other SSBO for particles' next position for computing
+    SSBO m_nextPositions;
 
     /// @brief The SSBO for storing the velocities of particles; initialized
     SSBO m_velocities;
@@ -41,12 +50,6 @@ private:
 
     /// @brief The SSBO for storing the prefix sum of particles in the cells
     SSBO m_prefixSumParticlesCells;
-
-    /// @brief The SSBO for particles' intermediate position for computing
-    SSBO m_intermediatePositions;
-
-    /// @brief The other SSBO for particles' next position for computing
-    SSBO m_nextPositions;
 
     /// @brief The SSBO for storing the densities of particles, only for debugging
     SSBO m_densities;
@@ -63,14 +66,20 @@ private:
     /// @brief Shader for counting the number of particles in cells
     ShaderProgram m_particlesCellsShader;
 
-    /// @brief Shader for computing the prefix sum
-    ShaderProgram m_prefixSumShader;
+    /// @brief Shader for computing prefix sum within local groups
+    ShaderProgram m_prefixSumLocalShader;
+
+    /// @brief Shader for computing prefix sum globally
+    ShaderProgram m_prefixSumGlobalShader;
 
     /// @brief Shader for reindexing particles
     ShaderProgram m_reindexShader;
 
     /// @brief Shader for computing lambdas
-    ShaderProgram m_positionSolverShader;
+    ShaderProgram m_computeLambdaShader;
+
+    /// @brief Shader for computing positions after calculating lambdas
+    ShaderProgram m_computePositionShader;
 
     /// @brief Shader for velocity correction
     ShaderProgram m_velocityCorrectShader;
@@ -119,4 +128,13 @@ public:
 
     /// @brief Update to the next frame
     void update();
+
+    /// @brief Reset the position of particles
+    void reset();
+
+    /// @brief Move boundary in x direction
+    void moveBoundaryX(float amount);
+
+    /// @brief Move boundary in y direction
+    void moveBoundaryZ(float amount);
 };

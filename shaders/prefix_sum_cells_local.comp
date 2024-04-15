@@ -2,12 +2,12 @@
 
 layout(local_size_x = 1024) in;
 
-layout(std430, binding = 0) readonly buffer block0
+layout(std430, binding = 0) coherent readonly buffer block0
 {
     uint in_particlesCells[];
 };
 
-layout(std430, binding = 1) buffer block1
+layout(std430, binding = 1) coherent writeonly buffer block1
 {
     uint out_sumParticlesCells[];
 };
@@ -18,8 +18,7 @@ void main()
 {
     uint localId = gl_LocalInvocationID.x;
     uint globalId = gl_GlobalInvocationID.x;
-    const uint localSteps = uint(log2(gl_WorkGroupSize.x)) + 1;
-    const uint globalSteps = uint(log2(gl_WorkGroupSize.x * gl_NumWorkGroups.x)) + 1;
+    const uint localSteps = uint(ceil(log2(gl_WorkGroupSize.x))) + 1;
 
     // prefix sum local
     s_localSumParticles[localId * 2] = in_particlesCells[globalId * 2];
@@ -33,7 +32,7 @@ void main()
         uint mask = (1 << step) - 1;
         uint readId = ((localId >> step) << (step + 1)) + mask;
         uint writeId = readId + 1 + (localId & mask);
-        s_localSumParticles[writeId] += s_localSumParticles[readId];
+        atomicAdd(s_localSumParticles[writeId], s_localSumParticles[readId]);
 
         barrier();
         memoryBarrierShared();
@@ -42,17 +41,4 @@ void main()
     // prefix sum global
     out_sumParticlesCells[globalId * 2] = s_localSumParticles[localId * 2];
     out_sumParticlesCells[globalId * 2 + 1] = s_localSumParticles[localId * 2 + 1];
-    barrier();
-    memoryBarrierBuffer();
-
-    for (; step < globalSteps; step++)
-    {
-        uint mask = (1 << step) - 1;
-        uint readId = ((globalId >> step) << (step + 1)) + mask;
-        uint writeId = readId + 1 + (globalId & mask);
-        out_sumParticlesCells[writeId] += out_sumParticlesCells[readId];
-
-        barrier();
-        memoryBarrierBuffer();
-    }
 }

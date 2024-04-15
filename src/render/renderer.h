@@ -51,6 +51,9 @@ private:
     /// @brief Initialize the window
     static GLFWwindow* setupContext(int width, int height, const char* title);
 
+    /// @brief Callback when some specific keys are pressed
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 public:
     /// @brief Create a renderer
     Renderer();

@@ -1,0 +1,129 @@
+#version 460 core
+
+layout(local_size_x = 1024) in;
+
+layout(std430, binding = 0) coherent readonly buffer block0
+{
+    vec4 in_positions[];
+};
+
+layout(std430, binding = 1) readonly buffer block1
+{
+    float in_lambdas[];
+};
+
+layout(std430, binding = 2) coherent readonly buffer block2
+{
+    uint in_prefixSums[];
+};
+
+layout(std430, binding = 3) writeonly buffer block3
+{
+    vec4 out_positions[];
+};
+
+float poly6(vec3 rvec, float h)
+{
+    const float coeff = 1.5666814710608448; // 315 / (64 * PI)
+    float r = min(h, length(rvec));
+    return coeff * pow(h * h - r * r, 3) / pow(h, 9);
+}
+
+vec3 gradSpiky(vec3 rvec, float h)
+{
+    const float coeff = 4.7746482927568605; // 15 / PI
+    float r = length(rvec);
+    vec3 rNormalized = rvec / r;
+    r = min(h, r);
+    return -3.0 * coeff * pow(h - r, 2) * rNormalized / pow(h, 6);
+}
+
+struct Boundary
+{
+    vec3 low;
+    vec3 high;
+};
+
+uniform Boundary u_boundary;
+uniform uvec3 u_gridResolution;
+
+ivec3 cellIdVec(vec3 position)
+{
+    const vec3 diagonal = u_boundary.high - u_boundary.low;
+    vec3 cellSize = diagonal / u_gridResolution;
+    return ivec3((position - u_boundary.low) / cellSize);
+}
+
+uniform float u_mass;
+uniform float u_restDensity;
+uniform float u_radius;
+uniform float u_damping;
+uniform int u_iterations;
+
+const float poly6Coeff = 1.5666814710608448; // 315 / (64 * PI)
+const float deltaQ = 0.1 * u_radius;
+const float scorrDenominator = poly6Coeff * pow(u_radius * u_radius - deltaQ * deltaQ, 3) / pow(u_radius, 9);
+
+void main()
+{
+    uint id = gl_GlobalInvocationID.x;
+    vec3 position = in_positions[id].xyz;
+    ivec3 cellIdV = cellIdVec(position);
+
+    vec3 deltaPosition = vec3(0.0);
+    for (int i = max(0, cellIdV.x - 1); i < cellIdV.x + 2; i++)
+    {
+        for (int j = max(0, cellIdV.y - 1); j < cellIdV.y + 2; j++)
+        {
+            for (int k = max(0, cellIdV.z - 1); k < cellIdV.z + 2; k++)
+            {
+                uint cellIdx = i + u_gridResolution.x * j + u_gridResolution.x * u_gridResolution.y * k;
+                uint start = cellIdx == 0 ? 0 : in_prefixSums[cellIdx - 1];
+                uint end = in_prefixSums[cellIdx];
+                for (uint particleIdx = start; particleIdx < end; particleIdx++)
+                {
+                    if (id == particleIdx) continue;
+
+                    vec3 otherPosition = in_positions[particleIdx].xyz;
+                    vec3 diff = position - otherPosition;
+                    vec3 grad = gradSpiky(diff, u_radius);
+
+                    // artificial pressure
+                    float scorr = -pow(0.1 * poly6(diff, u_radius) / scorrDenominator, 4);
+                    if (isinf(scorr) || isnan(scorr)) scorr = 0.0;
+
+                    deltaPosition += (in_lambdas[id] + in_lambdas[particleIdx] + scorr) * u_mass * grad / u_restDensity;
+                }
+            }
+        }
+    }
+    position += clamp(deltaPosition, -u_radius, u_radius) / u_iterations;
+
+    // collision detection
+    if (position.x < u_boundary.low.x)
+    {
+        position.x = u_boundary.low.x + u_damping * (u_boundary.low.x - position.x) + 1e-3;
+    }
+    if (position.x >= u_boundary.high.x)
+    {
+        position.x = u_boundary.high.x - u_damping * (position.x - u_boundary.high.x) - 1e-3;
+    }
+    if (position.y <= u_boundary.low.y)
+    {
+        position.y = u_boundary.low.y + u_damping * (u_boundary.low.y - position.y) + 1e-3;
+    }
+    if (position.y >= u_boundary.high.y)
+    {
+        position.y = u_boundary.high.y - u_damping * (position.y - u_boundary.high.y) - 1e-3;
+    }
+    if (position.z <= u_boundary.low.z)
+    {
+        position.z = u_boundary.low.z + u_damping * (u_boundary.low.z - position.z) + 1e-3;
+    }
+    if (position.z >= u_boundary.high.z)
+    {
+        position.z = u_boundary.high.z - u_damping * (position.z - u_boundary.high.z) - 1e-3;
+    }
+
+    out_positions[id].xyz = position;
+}

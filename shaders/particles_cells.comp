@@ -7,7 +7,7 @@ layout(std430, binding = 0) readonly buffer block0
     vec4 in_positions[];
 };
 
-layout(std430, binding = 1) buffer block1
+layout(std430, binding = 1) coherent buffer block1
 {
     uint inout_particlesCells[];
 };
@@ -26,7 +26,8 @@ uint cellID(vec3 position)
     const vec3 diagonal = u_boundary.high - u_boundary.low;
     vec3 cellSize = diagonal / u_gridResolution;
     uvec3 cellIdx = uvec3((position - u_boundary.low) / cellSize);
-    return cellIdx.x + u_gridResolution.x * cellIdx.y + u_gridResolution.x * u_gridResolution.y * cellIdx.z;
+    uint idx =  cellIdx.x + u_gridResolution.x * cellIdx.y + u_gridResolution.x * u_gridResolution.y * cellIdx.z;
+    return idx;
 }
 
 void main()

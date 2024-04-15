@@ -2,24 +2,34 @@
 
 layout(local_size_x = 1024) in;
 
-layout(std430, binding = 0) readonly buffer block0
-{
-    vec4 in_positions[];
-};
-
-layout(std430, binding = 1) readonly buffer block1
+layout(std430, binding = 0) coherent readonly buffer block0
 {
     uint in_prefixSums[];
 };
 
-layout(std430, binding = 2) coherent buffer block2
+layout(std430, binding = 1) coherent buffer block1
 {
     uint inout_particlesCells[];
 };
 
-layout(std430, binding = 3) buffer block3
+layout(std430, binding = 2) readonly buffer block2
 {
-    vec4 out_positions[];
+    vec4 in_predictedPositions[];
+};
+
+layout(std430, binding = 3) coherent writeonly buffer block3
+{
+    vec4 out_predictedPositions[];
+};
+
+layout(std430, binding = 4) readonly buffer block4
+{
+    vec4 in_origPositions[];
+};
+
+layout(std430, binding = 5) coherent writeonly buffer block5
+{
+    vec4 out_origPositions[];
 };
 
 struct Boundary
@@ -36,15 +46,17 @@ uint cellID(vec3 position)
     const vec3 diagonal = u_boundary.high - u_boundary.low;
     vec3 cellSize = diagonal / u_gridResolution;
     uvec3 cellIdx = uvec3((position - u_boundary.low) / cellSize);
-    return cellIdx.x + u_gridResolution.x * cellIdx.y + u_gridResolution.x * u_gridResolution.y * cellIdx.z;
+    uint idx =  cellIdx.x + u_gridResolution.x * cellIdx.y + u_gridResolution.x * u_gridResolution.y * cellIdx.z;
+    return idx;
 }
 
 void main()
 {
-    vec4 position = in_positions[gl_GlobalInvocationID.x];
+    uint id = gl_GlobalInvocationID.x;
+    vec4 position = in_predictedPositions[id];
     uint cellIdx = cellID(position.xyz);
     uint particleIdxCell = atomicAdd(inout_particlesCells[cellIdx], -1);
     uint particleIdx = in_prefixSums[cellIdx] - particleIdxCell;
-    out_positions[particleIdx] = position;
-    // out_positions[gl_GlobalInvocationID.x] = in_positions[gl_GlobalInvocationID.x];
+    out_predictedPositions[particleIdx] = position;
+    out_origPositions[particleIdx] = in_origPositions[id];
 }

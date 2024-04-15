@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cmath>
 
 namespace helper
 {
@@ -8,5 +9,5 @@ namespace helper
     /// @param input the input
     /// @param unit the unit
     /// @return the rounded-up number
-    inline int roundUp(int input, int unit) { return (input / unit + 1) * unit; }
+    int roundUp(int input, int unit);
 }

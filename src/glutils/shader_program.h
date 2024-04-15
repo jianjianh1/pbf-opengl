@@ -84,6 +84,9 @@ public:
     /// @brief Set an integer uniform
     void setUniform(const char* name, int value);
 
+    /// @brief Set an unsigned int uniform
+    void setUniform(const char* name, unsigned int value);
+
     /// @brief Set an float uniform
     void setUniform(const char* name, float value);
 

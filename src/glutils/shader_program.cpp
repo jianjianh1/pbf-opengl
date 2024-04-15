@@ -155,6 +155,15 @@ void ShaderProgram::setUniform(const char *name, int value)
     );
 }
 
+void ShaderProgram::setUniform(const char* name, unsigned int value)
+{
+    glUseProgram(m_id);
+    glUniform1ui(
+        glGetUniformLocation(m_id, name),
+        value
+    );
+}
+
 void ShaderProgram::setUniform(const char *name, float value)
 {
     glUseProgram(m_id);
