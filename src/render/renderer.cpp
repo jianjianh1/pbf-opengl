@@ -17,9 +17,9 @@ namespace render_params
 
     constexpr int fpsFrames{ 60 }; // compute fps every this frames
 
-    constexpr float cameraDistance{ 3.0f };
+    constexpr float cameraDistance{ 2.5f };
     constexpr float cameraAngleY{ 60.0f };
-    constexpr float cameraAngleX{ 60.0f };
+    constexpr float cameraAngleX{ 75.0f };
 
     constexpr float lightDistance{ 4.0f };
     constexpr float lightAngleY{ 10.0f };
