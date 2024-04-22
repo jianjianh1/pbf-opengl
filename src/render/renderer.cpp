@@ -18,12 +18,12 @@ namespace render_params
     constexpr int fpsFrames{ 60 }; // compute fps every this frames
 
     constexpr float cameraDistance{ 2.5f };
-    constexpr float cameraAngleY{ 60.0f };
-    constexpr float cameraAngleX{ 75.0f };
+    constexpr float cameraAngleY{ 70.0f };
+    constexpr float cameraAngleX{ 50.0f };
 
     constexpr float lightDistance{ 4.0f };
-    constexpr float lightAngleY{ 10.0f };
-    constexpr float lightAngleX{ -90.0f };
+    constexpr float lightAngleY{ 60.0f };
+    constexpr float lightAngleX{ 45.0f };
 
     constexpr float fov{ 45.0f }; // in degree
     constexpr float near{ 0.1f };
@@ -49,6 +49,7 @@ namespace render_params
 namespace shader_path
 {
     const char* particleVert{ "shaders/particle.vert" };
+    const char* depthFrag{ "shaders/depth.frag" };
     const char* normalFrag{ "shaders/normal.frag" };
     const char* thicknessFrag{ "shaders/thickness.frag" };
     const char* quadVert{ "shaders/fullscreen_quad.vert" };
@@ -199,11 +200,11 @@ void Renderer::renderFinal()
     m_screenQuad.draw(m_finalShader);
 }
 
-void Renderer::renderDepthNormal()
+void Renderer::renderDepth()
 {
-    m_depthNormalFBO.bind(m_depthTexture);
-    m_depthNormalFBO.bind(m_normalTexture);
-    m_depthNormalFBO.activate();
+    m_depthFBO.bind(m_depthTexture);
+    m_depthFBO.disableColorOutput();
+    m_depthFBO.activate();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -215,16 +216,37 @@ void Renderer::renderDepthNormal()
     glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
-    m_depthNormalShader.setUniform("u_mvp", m_projMatrix * m_camera.viewMatrix());
-    m_depthNormalShader.setUniform("u_mv", m_camera.viewMatrix());
-    m_depthNormalShader.setUniform("u_pointSize", render_params::pointSize);
-    m_depthNormalShader.setUniform("u_proj", m_projMatrix);
-    m_depthNormalShader.setUniform("u_radius", render_params::particleRadius);
-    m_depthNormalShader.setUniform("u_near", render_params::near);
-    m_depthNormalShader.setUniform("u_far", render_params::far);
-    m_fluid.draw(m_depthNormalShader);
+    m_depthShader.setUniform("u_mvp", m_projMatrix * m_camera.viewMatrix());
+    m_depthShader.setUniform("u_mv", m_camera.viewMatrix());
+    m_depthShader.setUniform("u_pointSize", render_params::pointSize);
+    m_depthShader.setUniform("u_proj", m_projMatrix);
+    m_depthShader.setUniform("u_radius", render_params::particleRadius);
+    m_depthShader.setUniform("u_near", render_params::near);
+    m_depthShader.setUniform("u_far", render_params::far);
+    m_fluid.draw(m_depthShader);
 
-    m_depthNormalFBO.deactivate();
+    m_depthFBO.deactivate();
+}
+
+void Renderer::renderNormal()
+{
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+
+    // first pass smooth horizontal
+    m_normalFBO.bind(m_normalTexture);
+    m_normalFBO.disableDepthOutput();
+    m_normalFBO.activate();
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_depthTexture.bind(0);
+    m_normalShader.setUniform("u_depthMap", 0);
+    m_normalShader.setUniform("u_texelSize", glm::vec2{ 1.0f / render_params::renderTextureWidth, 1.0f / render_params::renderTextureHeight });
+    m_normalShader.setUniform("u_projInv", glm::inverse(m_projMatrix));
+    m_screenQuad.draw(m_normalShader);
+
+    m_normalFBO.deactivate();
 }
 
 void Renderer::renderThickness()
@@ -265,9 +287,9 @@ void Renderer::smoothNormal()
     glEnable(GL_DEPTH_TEST);
 
     // first pass smooth horizontal
-    m_depthNormalFBO.bind(m_smoothNormalTexture);
-    m_depthNormalFBO.disableDepthOutput();
-    m_depthNormalFBO.activate();
+    m_normalFBO.bind(m_smoothNormalTexture);
+    m_normalFBO.disableDepthOutput();
+    m_normalFBO.activate();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -277,9 +299,9 @@ void Renderer::smoothNormal()
     m_screenQuad.draw(m_smoothShader);
 
     // second path smooth vertical
-    m_depthNormalFBO.bind(m_normalTexture);
-    m_depthNormalFBO.disableDepthOutput();
-    m_depthNormalFBO.activate();
+    m_normalFBO.bind(m_normalTexture);
+    m_normalFBO.disableDepthOutput();
+    m_normalFBO.activate();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -288,7 +310,7 @@ void Renderer::smoothNormal()
     m_smoothShader.setUniform("u_direction", glm::vec2{ 0.0f, 1.0f / render_params::renderTextureHeight });
     m_screenQuad.draw(m_smoothShader);
 
-    m_depthNormalFBO.deactivate();
+    m_normalFBO.deactivate();
 }
 
 void Renderer::renderBackground()
@@ -324,7 +346,8 @@ Renderer::Renderer()
     , m_thicknessTexture{ render_params::renderTextureWidth, render_params::renderTextureHeight, GL_RGB }
     , m_backgroundTexture{ render_params::backgroundWidth, render_params::backgroundHeight, GL_RGB }
     , m_finalShader{ shader_path::quadVert, shader_path::finalFrag }
-    , m_depthNormalShader{ shader_path::particleVert, shader_path::normalFrag }
+    , m_depthShader{ shader_path::particleVert, shader_path::depthFrag }
+    , m_normalShader{ shader_path::quadVert, shader_path::normalFrag }
     , m_thicknessShader{ shader_path::particleVert, shader_path::thicknessFrag }
     , m_smoothShader{ shader_path::quadVert, shader_path::gaussianFrag }
     , m_backgroundShader{ shader_path::quadVert, shader_path::backgroundFrag }
@@ -350,8 +373,9 @@ void Renderer::run()
             render_params::fov, static_cast<float>(m_width) / m_height,
             render_params::near, render_params::far);
 
-        renderDepthNormal();
+        renderDepth();
         renderThickness();
+        renderNormal();
         renderBackground();
         smoothNormal();
         renderFinal();

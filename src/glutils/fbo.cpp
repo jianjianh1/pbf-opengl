@@ -40,6 +40,8 @@ void FBO::bind(const Texture& texture)
     case GL_RGB:
     case GL_RGBA:
         attachment = GL_COLOR_ATTACHMENT0;
+        //glDrawBuffer(attachment);
+        //glReadBuffer(attachment);
         break;
     case GL_DEPTH_COMPONENT:
         attachment = GL_DEPTH_ATTACHMENT;

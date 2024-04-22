@@ -20,5 +20,5 @@ void main()
     float constraint = a_density / restDensity - 1.0;
     gl_Position = u_mvp * vec4(a_position, 1.0);
     // small size when density is small or depth is far
-    gl_PointSize = min(1.0, 1.0 + 10.0 * constraint) * u_pointSize / linearDepth;
+    gl_PointSize = min(1.0, 1.0 + 30.0 * constraint) * u_pointSize / linearDepth;
 }

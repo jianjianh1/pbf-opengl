@@ -1,4 +1,5 @@
 configure_file("particle.vert" "particle.vert" COPYONLY)
+configure_file("depth.frag" "depth.frag" COPYONLY)
 configure_file("normal.frag" "normal.frag" COPYONLY)
 configure_file("thickness.frag" "thickness.frag" COPYONLY)
 configure_file("fullscreen_quad.vert" "fullscreen_quad.vert" COPYONLY)

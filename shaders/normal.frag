@@ -2,22 +2,49 @@
 
 out layout(location = 0) vec4 out_FragColor;
 
-in vec3 v_positionView;
+in vec2 v_texCoord;
 
-uniform mat4 u_proj;
-uniform float u_radius;
+uniform vec2 u_texelSize;
+uniform sampler2D u_depthMap;
+uniform mat4 u_projInv;
+
+vec3 posView(vec2 uv)
+{
+    float depth = texture(u_depthMap, uv).x;
+    vec3 posClip = 2.0 * vec3(uv, depth) - 1.0;
+    vec4 _posView = u_projInv * vec4(posClip, 1.0);
+    vec3 posView = _posView.xyz / _posView.w;
+    return posView;
+}
 
 void main()
 {
-    vec2 posToCenter = gl_PointCoord * 2.0 - 1.0;
-    float distSqrToCenter = dot(posToCenter, posToCenter);
-    if (distSqrToCenter > 1.0) discard;
-    vec3 normal = vec3(posToCenter, sqrt(1.0 - distSqrToCenter));
+    float depth = texture(u_depthMap, v_texCoord).x;
+    if (depth == 1.0)
+    {
+        discard;
+    }
 
-    vec3 posView = v_positionView + u_radius * normal;
-    vec4 posClip = u_proj * vec4(posView, 1.0);
-    // gl_FragDepth = 0.5 * posClip.z / posClip.w + 0.5;
-    gl_FragDepth = posClip.z / posClip.w;
+    vec3 center = posView(v_texCoord);
+    vec3 right = posView(v_texCoord + vec2(u_texelSize.x, 0.0));
+    vec3 left = posView(v_texCoord - vec2(u_texelSize.x, 0.0));
+    vec3 up = posView(v_texCoord + vec2(0.0, u_texelSize.y));
+    vec3 down = posView(v_texCoord - vec2(0, u_texelSize.y));
 
+    vec3 dx = left - center;
+    vec3 dx2 = center - right;
+    if (abs(dx.z) > abs(dx2.z))
+    {
+        dx = dx2; // this makes it better at edges
+    }
+
+    vec3 dy = up - center;
+    vec3 dy2 = center - down;
+    if (abs(dy.z) > abs(dy2.z))
+    {
+        dy = dy2;
+    }
+
+    vec3 normal = normalize(cross(dy, dx));
     out_FragColor = vec4(normal, 1.0);
 }

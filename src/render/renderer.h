@@ -77,8 +77,11 @@ private:
     /// @brief Texture that shows background; should be the same size as window
     Texture m_backgroundTexture{};
 
-    /// @brief FBO for rendering depth and normal to texture
-    FBO m_depthNormalFBO{};
+    /// @brief FBO for rendering depth to texture
+    FBO m_depthFBO{};
+
+    /// @brief FBO for rendering normal to texture
+    FBO m_normalFBO{};
 
     /// @brief FBO for rendering thickness to texture
     FBO m_thicknessFBO{};
@@ -89,8 +92,11 @@ private:
     /// @brief Shader for rendering the final scene
     ShaderProgram m_finalShader{};
 
-    /// @brief Shader for rendering the depth and normal
-    ShaderProgram m_depthNormalShader{};
+    /// @brief Shader for rendering depth into texture
+    ShaderProgram m_depthShader{};
+
+    /// @brief Shader for rendering normal into texture using finite difference
+    ShaderProgram m_normalShader{};
 
     /// @brief Shader for rendering the thickness
     ShaderProgram m_thicknessShader{};
@@ -113,8 +119,11 @@ private:
     /// @brief Render final image
     void renderFinal();
 
-    /// @brief Render depth and normal to texture
-    void renderDepthNormal();
+    /// @brief Render depth to texture
+    void renderDepth();
+
+    /// @brief Render normal to texture using finite difference
+    void renderNormal();
 
     /// @brief Render thickness to texture
     void renderThickness();
