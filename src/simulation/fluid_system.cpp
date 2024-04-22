@@ -15,19 +15,16 @@ namespace simulation_params
 
     constexpr float waterDensity{ 997.0f }; // kg/m^3
     const glm::vec3 gravity{ 0.0f, -9.80665f, 0.0f }; // m/s^2
-    //const glm::vec3 gravity{ 0.0f, 0.0f, 0.0f }; // m/s^2
     constexpr float deltaTime{ 1.0f / (60 * stepsPerFrame) };
     constexpr float collisionDamping{ 0.1f };
 
-    constexpr int numParticles{ 80'000 };
-    constexpr int expectedParticlesPerCell{ 20 };
+    constexpr int numParticles{ 100'000 };
+    constexpr int expectedParticlesPerCell{ 15 };
 
-    const glm::vec3 boundaryLow{ -1.0f, -1.0f, -1.0f};
-    const glm::vec3 boundaryHigh{ 1.5f, 1.0f, 1.0f };
-    const glm::vec3 volumeLow{ -0.9f, -0.9f , -0.9f };
-    //const glm::vec3 volumeLow{ -1.0f, -1.0f , -1.0f };
-    const glm::vec3 volumeHigh{ 0.5f, 0.5f, 0.5f };
-    //const glm::vec3 volumeHigh{1.0f, 1.0f, 1.0f};
+    const glm::vec3 boundaryLow{ -1.0f, -0.5f, -1.0f};
+    const glm::vec3 boundaryHigh{ 1.0f, 2.0f, 1.0f };
+    const glm::vec3 volumeLow{ -0.8f, 0.8f , -0.8f };
+    const glm::vec3 volumeHigh{ 0.5f, 1.8f, 0.5f };
 
     constexpr int workGroupSize{ 1024 };
 }
@@ -103,13 +100,12 @@ void FluidSystem::countParticlesCells()
 
 void FluidSystem::prefixSumCells()
 {
-    //glCopyNamedBufferSubData(m_numParticles, m_prefixSumParticlesCells, 0, 0, m_grid.numCells * sizeof(GLuint));
     m_numParticlesCells.bind(0);
     m_prefixSumParticlesCells.bind(1);
 
     m_prefixSumLocalShader.activate();
     glDispatchCompute(m_grid.numCells / (2 * simulation_params::workGroupSize), 1, 1);
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     GLuint localSteps{ static_cast<GLuint>(glm::ceil(glm::log2(static_cast<float>(simulation_params::workGroupSize))) + 1) };
     GLuint globalSteps{ static_cast<GLuint>(glm::ceil(glm::log2(static_cast<float>(m_grid.numCells))) + 1) };
@@ -119,38 +115,12 @@ void FluidSystem::prefixSumCells()
     {
         m_prefixSumGlobalShader.setUniform("u_step", step);
         glDispatchCompute(m_grid.numCells / (2 * simulation_params::workGroupSize), 1, 1);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     }
-
-    //GLuint total;
-    //glGetNamedBufferSubData(m_prefixSumParticlesCells, (m_grid.resolution.x * m_grid.resolution.y * m_grid.resolution.z - 1) * sizeof(GLuint), sizeof(GLuint), &total);
-    //std::cout << "Total computed: " << total << "\n";
-    //std::cout << "Total particles: " << m_numParticles << '\n';
-    //if (total != m_numParticles) {
-        //GLuint* count = new GLuint[m_grid.numCells]{};
-        //glGetNamedBufferSubData(m_numParticlesCells, 0, m_grid.numCells * sizeof(GLuint), count);
-        //std::cout << "number of particles:\n";
-        //for (int i{ 0 }; i < m_grid.numCells; i++)
-        //    std::cout << count[i] << " ";
-        //std::cout << '\n';
-        //glGetNamedBufferSubData(m_prefixSumParticlesCells, 0, m_grid.numCells * sizeof(GLuint), count);
-        //std::cout << "prefix sum number of particles:\n";
-        //for (int i{ 0 }; i < m_grid.numCells; i++)
-        //    std::cout << count[i] << " ";
-        //std::cout << '\n';
-        //delete[] count;
-    //}
 }
 
 void FluidSystem::reindexParticles()
 {
-    //GLuint* count = new GLuint[m_grid.numCells];
-    //glGetNamedBufferSubData(m_numParticlesCells, 0, m_grid.numCells * sizeof(GLuint), count);
-    //std::cout << "number of particles in cells before:\n";
-    //for (int i{ 0 }; i < m_grid.numCells; i++)
-    //    std::cout << count[i] << " ";
-    //std::cout << '\n';
-
     m_prefixSumParticlesCells.bind(0);
     m_numParticlesCells.bind(1);
     m_intermediatePositions.bind(2);
@@ -165,21 +135,6 @@ void FluidSystem::reindexParticles()
     m_reindexShader.activate();
     glDispatchCompute(m_numParticles / simulation_params::workGroupSize, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-    //glGetNamedBufferSubData(m_numParticlesCells, 0, m_grid.numCells * sizeof(GLuint), count);
-    //std::cout << "number of particles in cells after:\n";
-    //for (int i{ 0 }; i < m_grid.numCells; i++)
-    //    std::cout << count[i] << " ";
-    //std::cout << '\n';
-
-    //const int offset = m_numParticles / 2;
-    //constexpr int n = 10;
-    //glm::vec4 positions[n];
-    //glad_glGetNamedBufferSubData(m_startPosition, offset, n * sizeof(glm::vec4), positions);
-    //std::cout << "Particle positions:\n";
-    //for (int i{ 0 }; i < n; i++)
-    //    std::cout << positions[i].x << " " << positions[i].y << " " << positions[i].z << '\n';
-
 }
 
 void FluidSystem::positionSolver()
@@ -217,19 +172,6 @@ void FluidSystem::positionSolver()
     m_computePositionShader.activate();
     glDispatchCompute(m_numParticles / simulation_params::workGroupSize, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-    //constexpr int testNum{ 10 };
-    //float densities[testNum];
-    //glGetNamedBufferSubData(m_densities, 0, testNum * sizeof(float), densities);
-    //std::cout << "Density:\n";
-    //for (int i{ 0 }; i < testNum; i++)
-    //    std::cout << densities[i] << " ";
-    //std::cout << '\n';
-    //glm::vec4 positions[testNum];
-    //glGetNamedBufferSubData(m_nextPositions, 1024 * sizeof(glm::vec4), testNum * sizeof(glm::vec4), positions);
-    //std::cout << "Positions:\n";
-    //for (int i{ 0 }; i < testNum; i++)
-    //    std::cout << positions[i].x << " " << positions[i].y << " " << positions[i].z << "\n";
 }
 
 void FluidSystem::updatePosition()
@@ -279,14 +221,6 @@ FluidSystem::FluidSystem()
     , m_computePositionShader{ shader_path::computePosition }
     , m_velocityCorrectShader{ shader_path::velocityCorrect }
 {
-    //GLuint count[10];
-    //std::cout << "Buffer ID: " << m_numParticlesCells << '\n';
-    //glGetNamedBufferSubData(m_numParticlesCells, 0, 10 * sizeof(GLuint), count);
-    //std::cout << "The number of particles:\n";
-    //for (int i{ 0 }; i < 10; i++)
-    //    std::cout << count[i] << " ";
-    //std::cout << '\n';
-
     std::cout << "Grid resolution: " << m_grid.resolution.x << ' ' << m_grid.resolution.y << ' ' << m_grid.resolution.z << '\n';
     std::cout << "Cell size: " << m_grid.cellSize << '\n';
     std::cout << "Number of particles: " << m_numParticles << '\n';
@@ -296,16 +230,10 @@ FluidSystem::FluidSystem()
 
 void FluidSystem::draw(const ShaderProgram& program) const
 {
-    //glCopyNamedBufferSubData(m_startPosition, m_savedPositions, 0, 0, m_numParticles * sizeof(glm::vec4));
     m_VAO.setAttrib(m_startPosition, 0, 3, GL_FLOAT, sizeof(glm::vec4), 0);
     m_VAO.setAttrib(m_densities, 1, 1, GL_FLOAT, sizeof(float), 0);
     program.activate();
-    glPointSize(5.0f);
     glDrawArrays(GL_POINTS, 0, m_numParticles);
-    //glUseProgram(program);
-    //float red[]{ 0.0f, 1.0f, 0.0f, 1.0f };
-    //glUniform4fv(glGetUniformLocation(program, "u_color"), 1, red);
-    //glDrawArrays(GL_POINTS, m_numParticles - 100, 99);
 }
 
 void FluidSystem::update()
@@ -333,14 +261,25 @@ void FluidSystem::reset()
 
 void FluidSystem::moveBoundaryX(float amount)
 {
-    m_boundary.high.x += amount;
-    if (m_boundary.high.x < m_volume.high.x) m_boundary.high.x = m_volume.high.x;
-    if (m_boundary.high.x > 3 * simulation_params::boundaryHigh.x) m_boundary.high.x = 3 * simulation_params::boundaryHigh.x;
+    m_boundary.low.x += amount;
+    if (m_boundary.low.x > simulation_params::boundaryLow.x) m_boundary.low.x = simulation_params::boundaryLow.x;
+    if (m_boundary.low.x < 3 * simulation_params::boundaryLow.x) m_boundary.low.x = 3 * simulation_params::boundaryLow.x;
+
+    resetGrid();
 }
 
 void FluidSystem::moveBoundaryZ(float amount)
 {
-    m_boundary.high.z += amount;
-    if (m_boundary.high.z < m_volume.high.z) m_boundary.high.z = m_volume.high.z;
-    if (m_boundary.high.z > 3 * simulation_params::boundaryHigh.z) m_boundary.high.z = 3 * simulation_params::boundaryHigh.z;
+    m_boundary.low.z += amount;
+    if (m_boundary.low.z > simulation_params::boundaryLow.z) m_boundary.low.z = simulation_params::boundaryLow.z;
+    if (m_boundary.low.z < 3 * simulation_params::boundaryLow.z) m_boundary.low.z = 3 * simulation_params::boundaryLow.z;
+
+    resetGrid();
+}
+
+void FluidSystem::resetGrid()
+{
+    m_grid = createGrid(m_boundary, m_volume, m_numParticles, simulation_params::expectedParticlesPerCell);
+    m_numParticlesCells = SSBO(GL_STATIC_COPY, m_grid.numCells * sizeof(GLuint), std::vector<GLuint>(m_grid.numCells).data());
+    m_prefixSumParticlesCells = SSBO(GL_STATIC_COPY, m_grid.numCells * sizeof(GLuint));
 }

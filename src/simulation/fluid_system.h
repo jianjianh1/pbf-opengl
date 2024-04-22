@@ -16,73 +16,73 @@ class FluidSystem
 {
 private:
     /// @brief The boundary of this system
-    BoundingBox m_boundary;
+    BoundingBox m_boundary{};
 
     /// @brief The volume of fluid in m^3; ideally it will not be changed
-    BoundingBox m_volume;
+    BoundingBox m_volume{};
 
     /// @brief Total number of particles
-    int m_numParticles;
+    int m_numParticles{};
 
     /// @brief The mass of each particle in kg
-    float m_mass;
+    float m_mass{};
 
     /// @brief The grid used for finding neighbors
-    Grid m_grid;
+    Grid m_grid{};
 
     /// @brief The SSBO for particles' starting position in one frame; initialized, used for drawing
-    SSBO m_startPosition;
+    SSBO m_startPosition{};
 
     /// @brief The buffer for saving position the starting positions reindexed; for velocity correction
-    SSBO m_savedPositions;
+    SSBO m_savedPositions{};
 
     /// @brief The SSBO for particles' intermediate position for computing
-    SSBO m_intermediatePositions;
+    SSBO m_intermediatePositions{};
 
     /// @brief The other SSBO for particles' next position for computing
-    SSBO m_nextPositions;
+    SSBO m_nextPositions{};
 
     /// @brief The SSBO for storing the velocities of particles; initialized
-    SSBO m_velocities;
+    SSBO m_velocities{};
 
     /// @brief The SSBO for storing the number of particles in the cells
-    SSBO m_numParticlesCells;
+    SSBO m_numParticlesCells{};
 
     /// @brief The SSBO for storing the prefix sum of particles in the cells
-    SSBO m_prefixSumParticlesCells;
+    SSBO m_prefixSumParticlesCells{};
 
     /// @brief The SSBO for storing the densities of particles, only for debugging
-    SSBO m_densities;
+    SSBO m_densities{};
 
     /// @brief The SSBO for storing lambdas (step size in the Newton's method) of particles
-    SSBO m_lambdas;
+    SSBO m_lambdas{};
 
     /// @brief The VAO for rendering particles
-    VAO m_VAO;
+    VAO m_VAO{};
 
     /// @brief Shader for computing gravity
-    ShaderProgram m_gravityShader;
+    ShaderProgram m_gravityShader{};
 
     /// @brief Shader for counting the number of particles in cells
-    ShaderProgram m_particlesCellsShader;
+    ShaderProgram m_particlesCellsShader{};
 
     /// @brief Shader for computing prefix sum within local groups
-    ShaderProgram m_prefixSumLocalShader;
+    ShaderProgram m_prefixSumLocalShader{};
 
     /// @brief Shader for computing prefix sum globally
-    ShaderProgram m_prefixSumGlobalShader;
+    ShaderProgram m_prefixSumGlobalShader{};
 
     /// @brief Shader for reindexing particles
-    ShaderProgram m_reindexShader;
+    ShaderProgram m_reindexShader{};
 
     /// @brief Shader for computing lambdas
-    ShaderProgram m_computeLambdaShader;
+    ShaderProgram m_computeLambdaShader{};
 
     /// @brief Shader for computing positions after calculating lambdas
-    ShaderProgram m_computePositionShader;
+    ShaderProgram m_computePositionShader{};
 
     /// @brief Shader for velocity correction
-    ShaderProgram m_velocityCorrectShader;
+    ShaderProgram m_velocityCorrectShader{};
 
     /// @brief Create a grid based on the parameters
     /// @param box the box to be divided into a grid of cells
@@ -118,6 +118,9 @@ private:
 
     /// @brief Correct velocities
     void velecityCorrection();
+
+    /// @brief Reset grid when the boundary is changed
+    void resetGrid();
 
 public:
     /// @brief Create a fluid system

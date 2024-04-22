@@ -1,5 +1,11 @@
 configure_file("particle.vert" "particle.vert" COPYONLY)
-configure_file("particle.frag" "particle.frag" COPYONLY)
+configure_file("normal.frag" "normal.frag" COPYONLY)
+configure_file("thickness.frag" "thickness.frag" COPYONLY)
+configure_file("fullscreen_quad.vert" "fullscreen_quad.vert" COPYONLY)
+configure_file("fullscreen_texture.frag" "fullscreen_texture.frag" COPYONLY)
+configure_file("gaussian.frag" "gaussian.frag" COPYONLY)
+configure_file("background.frag" "background.frag" COPYONLY)
+configure_file("final.frag" "final.frag" COPYONLY)
 
 configure_file("gravity.comp" "gravity.comp" COPYONLY)
 configure_file("particles_cells.comp" "particles_cells.comp" COPYONLY)

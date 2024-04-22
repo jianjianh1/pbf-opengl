@@ -33,15 +33,15 @@ public:
     /// @brief Activate this VAO
     inline void activate() const { glBindVertexArray(m_id); }
 
-    /// @brief Set an attribute with a SSBO
-    /// @param ssbo the SSBO
+    /// @brief Set an attribute with a buffer
+    /// @param buffer the buffer ID
     /// @param index the index of attribute
     /// @param size the size of attribute
     /// @param type the type of data
     /// @param stride the stride
     /// @param offset the offset
     /// @param normalized if the data is normalized
-    void setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized = GL_FALSE) const;
+    void setAttrib(GLuint buffer, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized = GL_FALSE) const;
 
     /// @brief Implicit conversion to unsigned int
     inline operator GLuint() const { return m_id; }

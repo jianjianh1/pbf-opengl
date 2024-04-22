@@ -90,6 +90,9 @@ public:
     /// @brief Set an float uniform
     void setUniform(const char* name, float value);
 
+    /// @brief Set a vec2 uniform
+    void setUniform(const char* name, const glm::vec2& value);
+
     /// @brief Set a vec3 uniform
     void setUniform(const char* name, const glm::vec3& value);
 

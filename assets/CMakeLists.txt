@@ -1,0 +1,6 @@
+configure_file("cubemap_posx.png" "cubemap_posx.png" COPYONLY)
+configure_file("cubemap_negx.png" "cubemap_negx.png" COPYONLY)
+configure_file("cubemap_posy.png" "cubemap_posy.png" COPYONLY)
+configure_file("cubemap_negy.png" "cubemap_negy.png" COPYONLY)
+configure_file("cubemap_posz.png" "cubemap_posz.png" COPYONLY)
+configure_file("cubemap_negz.png" "cubemap_negz.png" COPYONLY)

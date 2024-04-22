@@ -9,10 +9,7 @@ VAO::VAO()
 
 VAO::~VAO()
 {
-    if (m_id)
-    {
-        glDeleteVertexArrays(1, &m_id);
-    }
+    glDeleteVertexArrays(1, &m_id);
 }
 
 VAO::VAO(VAO&& other) noexcept
@@ -27,10 +24,10 @@ VAO& VAO::operator=(VAO&& other) noexcept
     return *this;
 }
 
-void VAO::setAttrib(const SSBO& ssbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized) const
+void VAO::setAttrib(GLuint buffer, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized) const
 {
     activate();
-    glBindBuffer(GL_ARRAY_BUFFER, ssbo);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<void*>(offset));
     glEnableVertexAttribArray(index);
 }

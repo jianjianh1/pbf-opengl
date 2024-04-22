@@ -118,10 +118,7 @@ GLint ShaderProgram::linkSuccess(GLuint program)
 
 ShaderProgram::~ShaderProgram()
 {
-    if (m_id)
-    {
-        glDeleteShader(m_id);
-    }
+    glDeleteShader(m_id);
 }
 
 ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept
@@ -170,6 +167,16 @@ void ShaderProgram::setUniform(const char *name, float value)
     glUniform1f(
         glGetUniformLocation(m_id, name),
         value
+    );
+}
+
+void ShaderProgram::setUniform(const char* name, const glm::vec2& value)
+{
+    glUseProgram(m_id);
+    glUniform2fv(
+        glGetUniformLocation(m_id, name),
+        1,
+        glm::value_ptr(value)
     );
 }
 
