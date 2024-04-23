@@ -4,7 +4,7 @@ out layout(location = 0) vec4 out_FragColor;
 
 in vec2 v_texCoord;
 
-uniform vec2 u_texelSize;
+uniform vec2 u_diff;
 uniform sampler2D u_depthMap;
 uniform mat4 u_projInv;
 
@@ -26,10 +26,10 @@ void main()
     }
 
     vec3 center = posView(v_texCoord);
-    vec3 right = posView(v_texCoord + vec2(u_texelSize.x, 0.0));
-    vec3 left = posView(v_texCoord - vec2(u_texelSize.x, 0.0));
-    vec3 up = posView(v_texCoord + vec2(0.0, u_texelSize.y));
-    vec3 down = posView(v_texCoord - vec2(0, u_texelSize.y));
+    vec3 right = posView(v_texCoord + vec2(u_diff.x, 0.0));
+    vec3 left = posView(v_texCoord - vec2(u_diff.x, 0.0));
+    vec3 up = posView(v_texCoord + vec2(0.0, u_diff.y));
+    vec3 down = posView(v_texCoord - vec2(0, u_diff.y));
 
     vec3 dx = left - center;
     vec3 dx2 = center - right;

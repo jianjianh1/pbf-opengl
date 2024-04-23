@@ -22,7 +22,6 @@ void main()
     uint globalId = gl_GlobalInvocationID.x;
     const uint localSteps = uint(ceil(log2(gl_WorkGroupSize.x))) + 1;
 
-    // prefix sum local
     s_localSumParticles[localId * 2] = in_particlesCells[globalId * 2];
     s_localSumParticles[localId * 2 + 1] = in_particlesCells[globalId * 2 + 1];
     barrier();
@@ -40,7 +39,6 @@ void main()
         memoryBarrierShared();
     }
 
-    // prefix sum global
     out_sumParticlesCells[globalId * 2] = s_localSumParticles[localId * 2];
     out_sumParticlesCells[globalId * 2 + 1] = s_localSumParticles[localId * 2 + 1];
 }

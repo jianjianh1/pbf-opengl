@@ -17,11 +17,11 @@ namespace render_params
 
     constexpr int fpsFrames{ 60 }; // compute fps every this frames
 
-    constexpr float cameraDistance{ 2.5f };
+    constexpr float cameraDistance{ 3.0f };
     constexpr float cameraAngleY{ 70.0f };
     constexpr float cameraAngleX{ 50.0f };
 
-    constexpr float lightDistance{ 4.0f };
+    constexpr float lightDistance{ 10.0f };
     constexpr float lightAngleY{ 60.0f };
     constexpr float lightAngleX{ 45.0f };
 
@@ -183,7 +183,7 @@ void Renderer::renderFinal()
     m_finalShader.setUniform("u_skybox", 4);
 
     m_finalShader.setUniform("u_projInv", glm::inverse(m_projMatrix));
-    m_finalShader.setUniform("u_viewInv", glm::transpose(glm::mat3(m_camera.viewMatrix())));
+    m_finalShader.setUniform("u_viewInv", glm::inverse(glm::mat3(m_camera.viewMatrix())));
 
     m_finalShader.setUniform("u_fluid.color", render_params::fluidColor);
     m_finalShader.setUniform("u_fluid.specular", render_params::fluidSpecular);
@@ -242,7 +242,7 @@ void Renderer::renderNormal()
 
     m_depthTexture.bind(0);
     m_normalShader.setUniform("u_depthMap", 0);
-    m_normalShader.setUniform("u_texelSize", glm::vec2{ 1.0f / render_params::renderTextureWidth, 1.0f / render_params::renderTextureHeight });
+    m_normalShader.setUniform("u_diff", glm::vec2{ 4.0f / render_params::renderTextureWidth, 4.0f / render_params::renderTextureHeight });
     m_normalShader.setUniform("u_projInv", glm::inverse(m_projMatrix));
     m_screenQuad.draw(m_normalShader);
 
