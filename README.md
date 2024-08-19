@@ -4,11 +4,11 @@ A fluid simulation system based on Position Based Fluids and screen space render
 
 ## Demo
 
-![Final Rendering](./demo/pdf-final.gif)
+![Final Rendering](https://github.com/jianjianh1/pbf-opengl/blob/main/demo/pbf-final.gif)
 
-![Particle Only 1](./demo/pdf-particle.gif)
+![Particle Only 1](https://github.com/jianjianh1/pbf-opengl/blob/main/demo/pbf-particle.gif)
 
-![Particle Only 2](./demo/pdf-particle2.gif)
+![Particle Only 2]([./demo/pdf-particle2.gif](https://github.com/jianjianh1/pbf-opengl/blob/main/demo/pbf-particle2.gif))
 
 ## Build
 
